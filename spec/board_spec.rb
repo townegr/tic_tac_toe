@@ -3,6 +3,7 @@ require 'spec_helper'
 module TicTacToe
   describe Board do
     let(:input) { {grid: 'matrix'} }
+
     context '#initialize' do
       it 'does not raise error when initialized with valid input' do
         expect{ Board.new(input) }.to_not raise_error
@@ -48,6 +49,11 @@ module TicTacToe
         expect(board.get_cell(0, 0).value).to eq('meow')
       end
     end
+    TestCell = Struct.new(:value)
+    let(:x_cell) { TestCell.new('X') }
+    let(:y_cell) { TestCell.new('Y') }
+    let(:empty) { TestCell.new }
+
     context '#game_over' do
       it 'returns :winner if winner? is true' do
         board = Board.new
@@ -64,6 +70,51 @@ module TicTacToe
         board = Board.new
         board.stub(:winner?) { false }
         board.stub(:draw?) { false }
+        expect(board.game_over).to be_false
+      end
+      it 'returns :winner when row has objects with values that are all the same' do
+        grid = [
+          [x_cell, x_cell, x_cell],
+          [y_cell, x_cell, y_cell],
+          [y_cell, y_cell, empty]
+        ]
+        board = Board.new(grid: grid)
+        expect(board.game_over).to eq(:winner)
+      end
+      it 'returns :winner when column has objects with values that are all the same' do
+        grid = [
+          [x_cell, x_cell, empty],
+          [y_cell, x_cell, y_cell],
+          [y_cell, x_cell, empty]
+        ]
+        board = Board.new(grid: grid)
+        expect(board.game_over).to eq(:winner)
+      end
+      it 'returns :winner when diagonal has objects with values that are all the same' do
+        grid = [
+          [x_cell, empty, empty],
+          [y_cell, x_cell, y_cell],
+          [y_cell, x_cell, x_cell]
+        ]
+        board = Board.new(grid: grid)
+        expect(board.game_over).to eq(:winner)
+      end
+      it 'returns :draw when all spaces on the board are taken' do
+        grid = [
+          [x_cell, y_cell, x_cell],
+          [y_cell, x_cell, y_cell],
+          [y_cell, x_cell, y_cell]
+        ]
+        board = Board.new(grid: grid)
+        expect(board.game_over).to eq(:draw)
+      end
+      it 'returns false when there is no winner or draw' do
+        grid = [
+          [x_cell, empty, empty],
+          [y_cell, empty, empty],
+          [y_cell, empty, empty]
+        ]
+        board = Board.new(grid: grid)
         expect(board.game_over).to be_false
       end
     end
